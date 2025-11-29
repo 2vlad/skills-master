@@ -6,14 +6,24 @@ export interface ModelOption {
 
 export const AVAILABLE_MODELS: ModelOption[] = [
   {
+    id: 'x-ai/grok-4.1-fast:free',
+    name: 'Grok 4.1 Fast (бесплатно)',
+    description: 'Быстрая бесплатная модель xAI',
+  },
+  {
+    id: 'openai/gpt-oss-20b:free',
+    name: 'GPT-OSS 20B (бесплатно)',
+    description: 'Бесплатная модель OpenAI',
+  },
+  {
     id: 'anthropic/claude-haiku-4.5',
     name: 'Claude Haiku 4.5',
-    description: 'Быстрая и дешёвая модель',
+    description: 'Быстрая модель (платно)',
   },
   {
     id: 'openai/gpt-5.1',
     name: 'GPT-5.1',
-    description: 'Качественная модель OpenAI',
+    description: 'Качественная модель (платно)',
   },
 ];
 
