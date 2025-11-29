@@ -26,7 +26,7 @@ export function SkillsList({ skills, profile }: SkillsListProps) {
           <a
             key={skill.id}
             href={`#skill-${skill.id}`}
-            className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+            className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-300 rounded-full transition-colors border border-gray-300"
           >
             {index + 1}. {skill.name}
           </a>

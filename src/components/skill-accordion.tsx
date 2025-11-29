@@ -57,7 +57,7 @@ export function SkillAccordion({ skill }: SkillAccordionProps) {
               {skill.coreTechnologies.map((tech, i) => (
                 <span
                   key={i}
-                  className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-md"
+                  className="px-2 py-1 bg-gray-200 text-black text-sm rounded-md"
                 >
                   {tech}
                 </span>
@@ -104,7 +104,7 @@ export function SkillAccordion({ skill }: SkillAccordionProps) {
                   {skill.project.focusSkills.map((fs, i) => (
                     <span
                       key={i}
-                      className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded"
+                      className="px-2 py-0.5 bg-gray-200 text-black text-xs rounded"
                     >
                       {fs}
                     </span>

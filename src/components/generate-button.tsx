@@ -17,7 +17,7 @@ export function GenerateButton({ onClick, disabled, loading }: GenerateButtonPro
         w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all
         ${disabled || loading
           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          : 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm hover:shadow-md'
+          : 'bg-black hover:bg-gray-800 text-white shadow-sm hover:shadow-md'
         }
       `}
     >

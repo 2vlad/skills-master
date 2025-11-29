@@ -76,11 +76,11 @@ export default function AdminPage() {
             )}
 
             {state.error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-700 text-sm">{state.error}</p>
+              <div className="bg-gray-100 border border-gray-400 rounded-lg p-4">
+                <p className="text-black text-sm">{state.error}</p>
                 <button 
                   onClick={reset}
-                  className="mt-2 text-red-600 text-sm underline hover:no-underline"
+                  className="mt-2 text-black text-sm underline hover:no-underline"
                 >
                   Попробовать снова
                 </button>

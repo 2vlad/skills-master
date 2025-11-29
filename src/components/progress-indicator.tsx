@@ -17,12 +17,12 @@ export function ProgressIndicator({ current, total, currentSkill }: ProgressIndi
         <span className="text-gray-600">
           Обработано {current} из {total} скиллов
         </span>
-        <span className="font-medium text-primary-600">{percentage}%</span>
+        <span className="font-medium text-black">{percentage}%</span>
       </div>
 
       <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
         <div
-          className="h-full bg-primary-600 rounded-full transition-all duration-300 ease-out"
+          className="h-full bg-black rounded-full transition-all duration-300 ease-out"
           style={{ width: `${percentage}%` }}
         />
       </div>

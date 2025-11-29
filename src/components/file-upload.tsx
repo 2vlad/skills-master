@@ -78,12 +78,12 @@ export function FileUpload({ onFileSelect, selectedFile, disabled }: FileUploadP
   return (
     <div className="space-y-2">
       {selectedFile ? (
-        <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
+        <div className="flex items-center justify-between p-4 bg-gray-100 border border-gray-300 rounded-lg">
           <div className="flex items-center gap-3">
-            <FileText className="w-5 h-5 text-green-600" />
+            <FileText className="w-5 h-5 text-black" />
             <div>
-              <p className="text-sm font-medium text-green-800">{selectedFile.name}</p>
-              <p className="text-xs text-green-600">
+              <p className="text-sm font-medium text-black">{selectedFile.name}</p>
+              <p className="text-xs text-gray-500">
                 {(selectedFile.size / 1024).toFixed(1)} КБ
               </p>
             </div>
@@ -91,10 +91,10 @@ export function FileUpload({ onFileSelect, selectedFile, disabled }: FileUploadP
           {!disabled && (
             <button
               onClick={handleRemove}
-              className="p-1 hover:bg-green-100 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-200 rounded-full transition-colors"
               aria-label="Удалить файл"
             >
-              <X className="w-4 h-4 text-green-600" />
+              <X className="w-4 h-4 text-black" />
             </button>
           )}
         </div>
@@ -102,7 +102,7 @@ export function FileUpload({ onFileSelect, selectedFile, disabled }: FileUploadP
         <label
           className={`
             flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer transition-colors
-            ${dragOver ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-gray-400'}
+            ${dragOver ? 'border-black bg-gray-100' : 'border-gray-300 hover:border-gray-500'}
             ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
           `}
           onDrop={handleDrop}
@@ -111,7 +111,7 @@ export function FileUpload({ onFileSelect, selectedFile, disabled }: FileUploadP
         >
           <Upload className="w-8 h-8 text-gray-400 mb-2" />
           <p className="text-sm text-gray-600 text-center">
-            <span className="text-primary-600 font-medium">Выберите файл</span> или перетащите сюда
+            <span className="text-black font-medium">Выберите файл</span> или перетащите сюда
           </p>
           <p className="text-xs text-gray-400 mt-1">CSV файл, до 5 МБ</p>
           <input

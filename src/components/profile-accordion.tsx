@@ -13,15 +13,15 @@ export function ProfileAccordion({ profile }: ProfileAccordionProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <div className="border-2 border-primary-200 rounded-lg overflow-hidden bg-primary-50/30">
+    <div className="border-2 border-gray-400 rounded-lg overflow-hidden bg-gray-50">
       {/* Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 text-left hover:bg-primary-50 transition-colors"
+        className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary-100 rounded-lg">
-            <User className="w-5 h-5 text-primary-600" />
+          <div className="p-2 bg-gray-200 rounded-lg">
+            <User className="w-5 h-5 text-black" />
           </div>
           <div>
             <h3 className="font-semibold text-gray-900">Профиль специалиста</h3>
@@ -37,7 +37,7 @@ export function ProfileAccordion({ profile }: ProfileAccordionProps) {
 
       {/* Content */}
       {isOpen && (
-        <div className="p-4 pt-0 space-y-5 border-t border-primary-100">
+        <div className="p-4 pt-0 space-y-5 border-t border-gray-300">
           {/* Market names */}
           <Section icon={Globe} title="Названия на рынках">
             <div className="overflow-x-auto">
