@@ -12,7 +12,7 @@ import { useGeneration } from '@/hooks/useGeneration';
 
 export default function AdminPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [model, setModel] = useState<string>('anthropic/claude-sonnet-4.5');
+  const [model, setModel] = useState<string>('anthropic/claude-haiku-4.5');
   const [profileName, setProfileName] = useState<string>('');
   
   const { state, startGeneration, reset } = useGeneration();
