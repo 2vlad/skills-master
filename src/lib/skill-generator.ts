@@ -88,7 +88,7 @@ export class SkillGenerator {
     }
 
     throw new SkillGenerationError(
-      `Не удалось сгенерировать скилл после ${this.maxRetries} попыток`,
+      `Не удалось сгенерировать скилл после ${this.maxRetries} попыток: ${lastError?.message || 'неизвестная ошибка'}`,
       parsedSkill.text,
       lastError?.message
     );

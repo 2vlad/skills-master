@@ -22,8 +22,9 @@ export async function POST(request: NextRequest) {
   // Check API key
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
+    console.error('[generate] OPENROUTER_API_KEY is not set');
     return new Response(
-      JSON.stringify({ error: 'OPENROUTER_API_KEY не настроен на сервере' }),
+      JSON.stringify({ error: 'OPENROUTER_API_KEY не настроен на сервере. Добавьте его в Vercel Environment Variables.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
