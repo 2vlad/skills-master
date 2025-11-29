@@ -1,7 +1,5 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
-
 interface ProgressIndicatorProps {
   current: number;
   total: number;
@@ -14,24 +12,23 @@ export function ProgressIndicator({ current, total, currentSkill }: ProgressIndi
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between text-sm">
-        <span className="text-gray-600">
-          Обработано {current} из {total} скиллов
+        <span className="text-[#86868b]">
+          {current} из {total}
         </span>
-        <span className="font-medium text-black">{percentage}%</span>
+        <span className="font-medium text-[#1d1d1f]">{percentage}%</span>
       </div>
 
-      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+      <div className="h-1.5 bg-[#f5f5f7] rounded-full overflow-hidden">
         <div
-          className="h-full bg-black rounded-full transition-all duration-300 ease-out"
+          className="h-full bg-[#1d1d1f] rounded-full transition-all duration-500 ease-out"
           style={{ width: `${percentage}%` }}
         />
       </div>
 
       {currentSkill && (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="truncate">{currentSkill}</span>
-        </div>
+        <p className="text-xs text-[#86868b] truncate">
+          {currentSkill}
+        </p>
       )}
     </div>
   );

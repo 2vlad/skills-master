@@ -76,44 +76,49 @@ export function FileUpload({ onFileSelect, selectedFile, disabled }: FileUploadP
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {selectedFile ? (
-        <div className="flex items-center justify-between p-4 bg-gray-100 border border-gray-300 rounded-lg">
-          <div className="flex items-center gap-3">
-            <FileText className="w-5 h-5 text-black" />
-            <div>
-              <p className="text-sm font-medium text-black">{selectedFile.name}</p>
-              <p className="text-xs text-gray-500">
-                {(selectedFile.size / 1024).toFixed(1)} КБ
-              </p>
-            </div>
+        <div className="flex items-center gap-3 p-4 bg-[#f5f5f7] rounded-xl">
+          <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
+            <FileText className="w-5 h-5 text-[#1d1d1f]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-[#1d1d1f] truncate">{selectedFile.name}</p>
+            <p className="text-xs text-[#86868b]">
+              {(selectedFile.size / 1024).toFixed(1)} КБ
+            </p>
           </div>
           {!disabled && (
             <button
               onClick={handleRemove}
-              className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+              className="w-8 h-8 rounded-full hover:bg-[#e8e8ed] flex items-center justify-center transition-colors"
               aria-label="Удалить файл"
             >
-              <X className="w-4 h-4 text-black" />
+              <X className="w-4 h-4 text-[#86868b]" />
             </button>
           )}
         </div>
       ) : (
         <label
           className={`
-            flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer transition-colors
-            ${dragOver ? 'border-black bg-gray-100' : 'border-gray-300 hover:border-gray-500'}
+            flex flex-col items-center justify-center p-8 rounded-xl cursor-pointer transition-all duration-200
+            ${dragOver 
+              ? 'bg-[#f0f0f5] ring-2 ring-[#0071e3] ring-offset-2' 
+              : 'bg-[#f5f5f7] hover:bg-[#f0f0f5]'
+            }
             ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
           `}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
         >
-          <Upload className="w-8 h-8 text-gray-400 mb-2" />
-          <p className="text-sm text-gray-600 text-center">
-            <span className="text-black font-medium">Выберите файл</span> или перетащите сюда
+          <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm mb-4">
+            <Upload className="w-5 h-5 text-[#86868b]" />
+          </div>
+          <p className="text-sm text-[#1d1d1f] text-center font-medium">
+            Выберите CSV файл
           </p>
-          <p className="text-xs text-gray-400 mt-1">CSV файл, до 5 МБ</p>
+          <p className="text-xs text-[#86868b] mt-1">или перетащите сюда</p>
           <input
             type="file"
             accept=".csv"
@@ -125,12 +130,8 @@ export function FileUpload({ onFileSelect, selectedFile, disabled }: FileUploadP
       )}
 
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-[#ff3b30]">{error}</p>
       )}
-
-      <p className="text-xs text-gray-500">
-        Формат: первая колонка — текст скилла, вторая — отметка X
-      </p>
     </div>
   );
 }

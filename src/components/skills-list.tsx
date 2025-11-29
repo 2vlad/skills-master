@@ -11,22 +11,18 @@ interface SkillsListProps {
 
 export function SkillsList({ skills, profile }: SkillsListProps) {
   if (skills.length === 0) {
-    return (
-      <div className="text-center text-gray-400 py-8">
-        Нет скиллов для отображения
-      </div>
-    );
+    return null;
   }
 
   return (
     <div className="space-y-4">
       {/* Skills navigation */}
-      <div className="flex flex-wrap gap-2 pb-4 border-b border-gray-200">
+      <div className="flex flex-wrap gap-2">
         {skills.map((skill, index) => (
           <a
             key={skill.id}
             href={`#skill-${skill.id}`}
-            className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-300 rounded-full transition-colors border border-gray-300"
+            className="apple-tag hover:bg-[#e8e8ed] transition-colors"
           >
             {index + 1}. {skill.name}
           </a>
@@ -42,7 +38,7 @@ export function SkillsList({ skills, profile }: SkillsListProps) {
 
       {/* Profile accordion */}
       {profile && (
-        <div className="mt-6 pt-6 border-t border-gray-200">
+        <div className="mt-8">
           <ProfileAccordion profile={profile} />
         </div>
       )}

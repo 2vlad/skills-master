@@ -32,11 +32,8 @@ export function DownloadButton({ data, disabled }: DownloadButtonProps) {
       onClick={handleDownload}
       disabled={disabled}
       className={`
-        flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all
-        ${disabled
-          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          : 'bg-black hover:bg-gray-800 text-white shadow-sm hover:shadow-md'
-        }
+        apple-button-primary
+        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
       `}
     >
       <Download className="w-4 h-4" />
