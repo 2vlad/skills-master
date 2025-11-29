@@ -6,29 +6,14 @@ export interface ModelOption {
 
 export const AVAILABLE_MODELS: ModelOption[] = [
   {
-    id: 'anthropic/claude-3.5-sonnet',
-    name: 'Claude 3.5 Sonnet',
+    id: 'anthropic/claude-sonnet-4.5',
+    name: 'Claude Sonnet 4.5',
     description: 'Лучший баланс качества и скорости',
   },
   {
-    id: 'anthropic/claude-3-opus',
-    name: 'Claude 3 Opus',
-    description: 'Максимальное качество',
-  },
-  {
-    id: 'openai/gpt-4o',
-    name: 'GPT-4o',
-    description: 'Быстрый и качественный',
-  },
-  {
-    id: 'google/gemini-pro-1.5',
-    name: 'Gemini Pro 1.5',
-    description: 'Google Gemini',
-  },
-  {
-    id: 'meta-llama/llama-3.1-70b-instruct',
-    name: 'Llama 3.1 70B',
-    description: 'Open Source модель',
+    id: 'openai/gpt-5-nano',
+    name: 'GPT-5 Nano',
+    description: 'Быстрая и компактная модель',
   },
 ];
 
