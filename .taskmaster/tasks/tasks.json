@@ -1,0 +1,194 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Initialize Next.js Project with TypeScript",
+        "description": "Set up a new Next.js 14+ project with App Router, TypeScript configuration, and essential dependencies for the Skills-Master admin panel.",
+        "details": "1. Create Next.js project: `npx create-next-app@latest skills-master --typescript --tailwind --eslint --app --src-dir --import-alias '@/*'`\n2. Install additional dependencies:\n   - `papaparse` for CSV parsing\n   - `zod` for schema validation\n   - `lucide-react` for icons\n   - `@radix-ui/react-accordion` for accordion components\n3. Configure tsconfig.json with strict mode\n4. Set up project structure:\n   ```\n   src/\n   ├── app/\n   │   ├── admin/\n   │   │   └── page.tsx\n   │   ├── api/\n   │   │   └── generate/\n   │   │       └── route.ts\n   │   ├── layout.tsx\n   │   └── page.tsx\n   ├── components/\n   ├── lib/\n   ├── types/\n   └── hooks/\n   ```\n5. Create `.env.example` with OPENROUTER_API_KEY placeholder\n6. Configure `.gitignore` to exclude .env files",
+        "testStrategy": "1. Verify `npm run dev` starts successfully on localhost:3000\n2. Verify TypeScript compilation without errors\n3. Verify `/admin` route is accessible\n4. Verify environment variables load correctly in server context",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Define TypeScript Types and Zod Schemas",
+        "description": "Create comprehensive TypeScript type definitions and Zod validation schemas for SkillsJson, Skill, SpecialistProfile, and all related data structures as specified in the PRD.",
+        "details": "1. Create `src/types/skills.ts` with interfaces:\n   ```typescript\n   export interface SkillProject {\n     title: string;\n     description: string;\n     requirements: string[];\n     deliverables: string[];\n     focusSkills: string[];\n   }\n   \n   export interface Skill {\n     id: string;\n     source: { text: string; profileColumn: string; };\n     name: string;\n     summary: string;\n     details: string[];\n     coreTechnologies: string[];\n     checkQuestions: string[];  // length = 10\n     project: SkillProject;\n   }\n   \n   export interface SpecialistProfile {\n     title: string;\n     marketNames: { us: string[]; ru: string[]; de: string[]; };\n     avgSalary: { usdYear: number | null; rubMonth: number | null; eurYearDe: number | null; note?: string; };\n     typicalProjects: string[];\n     mustAnswerQuestions: string[];\n     testProject: { title: string; description: string; requirements: string[]; };\n   }\n   \n   export interface SkillsJson {\n     meta: { profileId: string; profileName: string; sourceFile: string; generatedAt: string; model: string; };\n     skills: Skill[];\n     specialistProfile: SpecialistProfile;\n   }\n   ```\n2. Create `src/lib/schemas.ts` with Zod schemas for runtime validation:\n   - `SkillSchema` with exactly 10 checkQuestions, non-empty arrays\n   - `SpecialistProfileSchema`\n   - `SkillsJsonSchema`\n3. Create `src/types/csv.ts` for CSV parsing types:\n   - `RawSkillRow`, `ParsedCSVResult`, `GenerationRequest`",
+        "testStrategy": "1. Write unit tests in `src/lib/__tests__/schemas.test.ts`\n2. Test Zod schemas accept valid data\n3. Test schemas reject invalid data (missing fields, wrong types, empty arrays)\n4. Test checkQuestions array length validation (exactly 10)\n5. Verify TypeScript compilation catches type errors",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Implement CSV Parser Module",
+        "description": "Create a robust CSV parser that handles UTF-8 encoding, auto-detects delimiter (comma or semicolon), skips header row, and extracts skills marked with 'X' in the profile column.",
+        "details": "1. Create `src/lib/csv-parser.ts`:\n   ```typescript\n   import Papa from 'papaparse';\n   \n   interface ParseOptions {\n     profileColumn?: string; // default 'A' or second column\n   }\n   \n   interface ParsedSkill {\n     id: string;  // hash or index\n     text: string;\n     profileColumn: string;\n   }\n   \n   interface ParseResult {\n     skills: ParsedSkill[];\n     sourceFile: string;\n     totalRows: number;\n     selectedRows: number;\n     errors: string[];\n   }\n   \n   export function parseCSV(content: string, fileName: string, options?: ParseOptions): ParseResult\n   ```\n2. Implementation logic:\n   - Use PapaParse with auto-detect delimiter (`,` or `;`)\n   - Skip first row (header)\n   - First column = skill text, second column = profile marker\n   - Filter rows where profile column contains 'X' (case-insensitive)\n   - Generate unique ID for each skill (hash of text or sequential index)\n3. Validation:\n   - File not empty\n   - At least 2 columns\n   - At least 1 skill with 'X'\n4. Error messages in Russian for UI display",
+        "testStrategy": "1. Unit tests in `src/lib/__tests__/csv-parser.test.ts`\n2. Test comma-delimited CSV parsing\n3. Test semicolon-delimited CSV parsing\n4. Test header row is skipped\n5. Test 'X' marker detection (case variations: 'x', 'X')\n6. Test error handling for empty file\n7. Test error handling for single column\n8. Test error handling for no marked skills\n9. Test UTF-8 encoding with Cyrillic characters",
+        "priority": "high",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Create OpenRouter API Integration",
+        "description": "Build a server-side service to communicate with OpenRouter API, handle authentication, make LLM requests for skill generation, and process responses with error handling.",
+        "details": "1. Create `src/lib/openrouter.ts`:\n   ```typescript\n   interface OpenRouterConfig {\n     apiKey: string;\n     baseUrl?: string;  // default: https://openrouter.ai/api/v1\n   }\n   \n   interface GenerateRequest {\n     model: string;\n     messages: { role: 'system' | 'user'; content: string; }[];\n     temperature?: number;\n   }\n   \n   export class OpenRouterClient {\n     constructor(config: OpenRouterConfig);\n     async generate(request: GenerateRequest): Promise<string>;\n   }\n   ```\n2. Implementation:\n   - HTTP POST to OpenRouter chat completions endpoint\n   - Headers: Authorization Bearer, HTTP-Referer, X-Title\n   - Handle rate limiting (429) with exponential backoff\n   - Handle API errors with meaningful messages\n   - Parse JSON response to extract generated content\n3. Create `src/lib/models.ts` with hardcoded model list:\n   ```typescript\n   export const AVAILABLE_MODELS = [\n     { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },\n     { id: 'openai/gpt-4o', name: 'GPT-4o' },\n     { id: 'google/gemini-pro-1.5', name: 'Gemini Pro 1.5' },\n     { id: 'meta-llama/llama-3.1-70b-instruct', name: 'Llama 3.1 70B' },\n   ];\n   ```\n4. Environment variable: `OPENROUTER_API_KEY`",
+        "testStrategy": "1. Integration tests with mocked HTTP responses\n2. Test successful API call and response parsing\n3. Test error handling for invalid API key\n4. Test error handling for rate limiting\n5. Test error handling for network failures\n6. Test temperature and model parameters are passed correctly\n7. Manual test with real API key (optional, for development)",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement Skill Generator with LLM Prompts",
+        "description": "Create the SkillGenerator service that constructs prompts for the LLM to generate detailed skill information (name, summary, details, technologies, questions, project) from raw skill text.",
+        "details": "1. Create `src/lib/skill-generator.ts`:\n   ```typescript\n   interface GenerateSkillInput {\n     skillText: string;\n     profileName: string;\n     modelId: string;\n   }\n   \n   export class SkillGenerator {\n     constructor(openRouterClient: OpenRouterClient);\n     async generateSkill(input: GenerateSkillInput): Promise<Skill>;\n   }\n   ```\n2. Create system prompt in `src/lib/prompts/skill-prompt.ts`:\n   ```\n   Ты — эксперт по составлению образовательных программ. На основе формулировки компетенции сгенерируй структурированный JSON со следующими полями:\n   - name: краткое название скилла (2-4 слова)\n   - summary: описание в 1-2 предложениях\n   - details: массив из 5-10 тезисов о том, что нужно знать/уметь\n   - coreTechnologies: массив из 5-10 технологий/инструментов\n   - checkQuestions: массив ровно из 10 вопросов для самопроверки\n   - project: объект с полями title, description, requirements[], deliverables[], focusSkills[]\n   \n   Отвечай ТОЛЬКО валидным JSON без markdown-форматирования.\n   ```\n3. Parse LLM response as JSON\n4. Validate response with Zod schema\n5. Retry logic (up to 3 attempts) if JSON parsing fails\n6. Generate skill ID from text hash (e.g., first 8 chars of SHA-256)",
+        "testStrategy": "1. Unit tests with mocked OpenRouterClient\n2. Test prompt construction includes skill text and profile name\n3. Test JSON response parsing\n4. Test Zod validation catches invalid responses\n5. Test retry logic on parse failures\n6. Test ID generation is deterministic\n7. Integration test with sample skill text",
+        "priority": "high",
+        "dependencies": [
+          2,
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Specialist Profile Builder",
+        "description": "Create the SpecialistProfileBuilder service that generates the comprehensive specialist profile based on all generated skills, including market names, salary estimates, typical projects, and test project.",
+        "details": "1. Create `src/lib/profile-builder.ts`:\n   ```typescript\n   interface BuildProfileInput {\n     profileName: string;\n     skills: Skill[];\n     modelId: string;\n   }\n   \n   export class SpecialistProfileBuilder {\n     constructor(openRouterClient: OpenRouterClient);\n     async buildProfile(input: BuildProfileInput): Promise<SpecialistProfile>;\n   }\n   ```\n2. Create system prompt in `src/lib/prompts/profile-prompt.ts`:\n   ```\n   На основе названия профиля и списка скиллов специалиста сгенерируй JSON с информацией о профиле:\n   - title: название профиля\n   - marketNames: { us: [...], ru: [...], de: [...] } — как называют на рынках\n   - avgSalary: { usdYear, rubMonth, eurYearDe, note } — примерные зарплаты\n   - typicalProjects: 5-10 примеров задач/проектов\n   - mustAnswerQuestions: 10-20 ключевых вопросов для собеседования\n   - testProject: { title, description, requirements[] } — тестовое задание\n   \n   Профиль: {profileName}\n   Скиллы: {skill names and summaries}\n   ```\n3. Pass skill names and summaries (not full details) to keep prompt concise\n4. Validate response with Zod schema\n5. Handle salary as null with disclaimer note if model cannot estimate",
+        "testStrategy": "1. Unit tests with mocked OpenRouterClient\n2. Test prompt includes profile name and skill summaries\n3. Test JSON response parsing\n4. Test Zod validation\n5. Test salary fields can be null with note\n6. Test marketNames has all three regions",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          4,
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Build API Route for Generation Workflow",
+        "description": "Create the Next.js API route `/api/generate` that orchestrates the entire generation workflow: parse CSV, generate skills sequentially, build profile, and return the complete SkillsJson with progress streaming.",
+        "details": "1. Create `src/app/api/generate/route.ts`:\n   ```typescript\n   export async function POST(request: Request) {\n     // Parse multipart form data\n     const formData = await request.formData();\n     const csvFile = formData.get('csv') as File;\n     const modelId = formData.get('model') as string;\n     const profileName = formData.get('profileName') as string;\n     \n     // Validate inputs\n     // Parse CSV\n     // Return streaming response for progress\n   }\n   ```\n2. Use Server-Sent Events (SSE) for progress updates:\n   ```typescript\n   const encoder = new TextEncoder();\n   const stream = new ReadableStream({\n     async start(controller) {\n       // Send progress: { type: 'progress', current: 1, total: 10, skillName: '...' }\n       // Send skill: { type: 'skill', data: Skill }\n       // Send profile: { type: 'profile', data: SpecialistProfile }\n       // Send complete: { type: 'complete', data: SkillsJson }\n     }\n   });\n   ```\n3. Process skills sequentially (not in parallel to avoid rate limits)\n4. Build SkillsJson with meta information\n5. Error handling:\n   - Return 400 for validation errors\n   - Return 500 for LLM errors with affected skill name\n6. Check OPENROUTER_API_KEY exists",
+        "testStrategy": "1. Integration tests with mocked services\n2. Test form data parsing (CSV file, model, profileName)\n3. Test validation errors return 400\n4. Test SSE progress updates are sent\n5. Test complete SkillsJson structure\n6. Test error response format\n7. Test missing API key returns appropriate error",
+        "priority": "high",
+        "dependencies": [
+          3,
+          5,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Create Admin Page Layout and File Upload Component",
+        "description": "Build the main admin page `/admin` with header, layout structure, CSV file upload component with drag-and-drop support, model selector, profile name input, and generate button.",
+        "details": "1. Create `src/app/admin/page.tsx` as client component:\n   ```typescript\n   'use client';\n   import { FileUpload } from '@/components/file-upload';\n   import { ModelSelector } from '@/components/model-selector';\n   import { GenerateButton } from '@/components/generate-button';\n   ```\n2. Create `src/components/file-upload.tsx`:\n   - Drag-and-drop zone with visual feedback\n   - Click to select file\n   - Accept only .csv files\n   - Display selected file name\n   - File size limit: 5MB\n   - Error display for invalid files\n3. Create `src/components/model-selector.tsx`:\n   - Dropdown with AVAILABLE_MODELS\n   - Default selection: first model\n4. Create `src/components/profile-name-input.tsx`:\n   - Text input for profileName\n   - Placeholder: \"Например: AI Practicum\"\n5. Layout structure:\n   - Header: \"Skills-Master Admin\" + subtitle\n   - Left panel: upload, settings, generate button\n   - Right panel: results area (placeholder for now)\n6. Russian language for all UI text\n7. Use Tailwind CSS for styling",
+        "testStrategy": "1. Manual testing of file upload UI\n2. Test drag-and-drop functionality\n3. Test file type restriction (.csv only)\n4. Test file size limit enforcement\n5. Test model selector displays all models\n6. Test profile name input accepts text\n7. Test responsive layout on different screen sizes",
+        "priority": "high",
+        "dependencies": [
+          1,
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Progress Indicator and Generation State",
+        "description": "Create the generation progress component that consumes SSE events from the API, displays current progress (X/N skills), handles errors, and transitions to results view on completion.",
+        "details": "1. Create `src/hooks/useGeneration.ts`:\n   ```typescript\n   interface GenerationState {\n     status: 'idle' | 'generating' | 'completed' | 'error';\n     progress: { current: number; total: number; currentSkill?: string; };\n     skills: Skill[];\n     profile: SpecialistProfile | null;\n     result: SkillsJson | null;\n     error: string | null;\n   }\n   \n   export function useGeneration() {\n     const [state, setState] = useState<GenerationState>({...});\n     \n     const startGeneration = async (file: File, model: string, profileName: string) => {\n       // POST to /api/generate\n       // Consume SSE stream\n       // Update state on each event\n     };\n     \n     return { state, startGeneration, reset };\n   }\n   ```\n2. Create `src/components/progress-indicator.tsx`:\n   - Show \"Обработано X из N скиллов\"\n   - Show current skill name being processed\n   - Animated progress bar\n   - Spinner during processing\n3. Error display component:\n   - Red banner with error message\n   - \"На каком скилле произошла ошибка\" if applicable\n   - \"Попробовать снова\" button\n4. State transitions:\n   - idle → generating (on generate click)\n   - generating → completed (on success)\n   - generating → error (on failure)\n   - error/completed → idle (on reset)",
+        "testStrategy": "1. Unit test useGeneration hook state transitions\n2. Test SSE event parsing\n3. Test progress updates correctly\n4. Test error state handling\n5. Test reset functionality\n6. Manual test with mock API responses",
+        "priority": "medium",
+        "dependencies": [
+          7,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Build Skills Accordion Display Component",
+        "description": "Create the accordion/tree-view component for displaying generated skills with collapsible sections showing all skill details: source, details, technologies, questions, and project.",
+        "details": "1. Create `src/components/skills-list.tsx`:\n   - Left navigation: list of skill names\n   - Click scrolls to corresponding accordion\n2. Create `src/components/skill-accordion.tsx` using Radix Accordion:\n   ```typescript\n   interface SkillAccordionProps {\n     skill: Skill;\n   }\n   ```\n   - Collapsed header: `name` (bold) + `summary` (gray, small)\n   - Expanded content sections:\n     a. \"Исходная формулировка\" — source.text in a quote block\n     b. \"Что нужно знать/уметь\" — details[] as bullet list\n     c. \"Технологии\" — coreTechnologies[] as tags/chips\n     d. \"Вопросы для самопроверки\" — checkQuestions[] numbered list\n     e. \"Проект для проверки скилла\" — project details in a card\n3. Create `src/components/profile-accordion.tsx`:\n   - \"Профиль специалиста\" header\n   - Sections:\n     a. title + marketNames as table (US/RU/DE columns)\n     b. avgSalary with disclaimer note\n     c. typicalProjects as bullet list\n     d. mustAnswerQuestions numbered list\n     e. testProject card\n4. Styling: clean, professional, Russian labels\n5. Allow multiple accordions open simultaneously",
+        "testStrategy": "1. Test accordion expand/collapse functionality\n2. Test all data fields render correctly\n3. Test empty arrays show appropriate message\n4. Test navigation click scrolls to correct accordion\n5. Test with various skill data sizes\n6. Visual regression testing for styling",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Implement JSON Download Functionality",
+        "description": "Add the download button that generates and downloads the complete skills.json file with proper filename format including profile ID and timestamp.",
+        "details": "1. Create `src/components/download-button.tsx`:\n   ```typescript\n   interface DownloadButtonProps {\n     data: SkillsJson;\n     disabled?: boolean;\n   }\n   \n   export function DownloadButton({ data, disabled }: DownloadButtonProps) {\n     const handleDownload = () => {\n       const filename = `skills_${data.meta.profileId}_${formatTimestamp(new Date())}.json`;\n       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });\n       const url = URL.createObjectURL(blob);\n       // Trigger download\n     };\n   }\n   ```\n2. Filename format: `skills_A_20241215_1430.json`\n3. JSON formatting: pretty-printed with 2-space indent\n4. Create `src/lib/utils.ts` with:\n   - `formatTimestamp(date: Date): string` → YYYYMMDD_HHMM\n5. Button placement: top-right of results panel\n6. Disabled state when no results available\n7. Optional: Add \"Raw JSON\" tab showing prettified JSON in a code block",
+        "testStrategy": "1. Test download triggers browser download\n2. Test filename format is correct\n3. Test JSON content is valid and formatted\n4. Test disabled state when no data\n5. Test timestamp formatting\n6. Manual test downloading and opening file",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          9,
+          10
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Add Error Handling and User Feedback",
+        "description": "Implement comprehensive error handling throughout the application with user-friendly Russian error messages, validation feedback, and appropriate UI states for all error scenarios.",
+        "details": "1. Create `src/lib/errors.ts`:\n   ```typescript\n   export class CSVParseError extends Error {\n     constructor(message: string, public details?: string) {\n       super(message);\n     }\n   }\n   \n   export class OpenRouterError extends Error {\n     constructor(message: string, public statusCode?: number) {\n       super(message);\n     }\n   }\n   \n   export class ValidationError extends Error {...}\n   ```\n2. Russian error messages mapping:\n   - \"Не удалось прочитать CSV, проверьте формат файла\"\n   - \"В выбранной колонке нет ни одной отметки X\"\n   - \"Файл пустой или повреждён\"\n   - \"Не удалось обратиться к модели. Проверьте ключ OpenRouter\"\n   - \"Ошибка при обработке скилла: {skillName}\"\n   - \"Модель вернула некорректный ответ\"\n3. Create `src/components/error-banner.tsx`:\n   - Red background, white text\n   - Dismiss button\n   - Optional \"details\" expandable section\n4. Create `src/components/validation-message.tsx`:\n   - For form field validation errors\n   - Yellow/orange warning style\n5. Update all components to display errors appropriately\n6. Console logging for debugging (not in production)",
+        "testStrategy": "1. Test each error type displays correct message\n2. Test error banner can be dismissed\n3. Test validation messages appear on form\n4. Test error details are shown when available\n5. Test errors don't crash the application\n6. Test error recovery (retry functionality)",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          4,
+          7,
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Configure Vercel Deployment",
+        "description": "Set up Vercel deployment configuration with environment variables, build settings, and ensure the application works correctly in the Vercel serverless environment.",
+        "details": "1. Create `vercel.json`:\n   ```json\n   {\n     \"buildCommand\": \"npm run build\",\n     \"framework\": \"nextjs\",\n     \"regions\": [\"fra1\"],\n     \"functions\": {\n       \"app/api/generate/route.ts\": {\n         \"maxDuration\": 300\n       }\n     }\n   }\n   ```\n2. Environment variables setup:\n   - OPENROUTER_API_KEY (secret)\n   - OPENROUTER_API_BASE (optional)\n3. Update `next.config.js`:\n   ```javascript\n   module.exports = {\n     experimental: {\n       serverActions: true,\n     },\n   };\n   ```\n4. Ensure SSE streaming works with Vercel Edge runtime\n5. Add README.md with deployment instructions\n6. Configure production logging level\n7. Test file upload size limits in Vercel (default 4.5MB)\n8. Add health check endpoint `/api/health`",
+        "testStrategy": "1. Deploy to Vercel preview environment\n2. Test file upload works in production\n3. Test API route executes within timeout\n4. Test SSE streaming works\n5. Test environment variables are accessible\n6. Test error handling in production mode\n7. Performance test with 10-20 skills",
+        "priority": "medium",
+        "dependencies": [
+          7,
+          11,
+          12
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-11-29T17:21:14.104Z",
+      "updated": "2025-11-29T17:21:14.104Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
