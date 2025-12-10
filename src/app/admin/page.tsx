@@ -12,7 +12,7 @@ import { useGeneration } from '@/hooks/useGeneration';
 
 export default function AdminPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [model, setModel] = useState<string>('google/gemini-2.0-flash-exp:free');
+  const [model, setModel] = useState<string>('google/gemini-2.0-flash-001');
   const [profileName, setProfileName] = useState<string>('');
   
   const { state, startGeneration, reset } = useGeneration();

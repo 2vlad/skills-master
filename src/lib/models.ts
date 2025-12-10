@@ -6,24 +6,24 @@ export interface ModelOption {
 
 export const AVAILABLE_MODELS: ModelOption[] = [
   {
-    id: 'google/gemini-2.0-flash-exp:free',
-    name: 'Gemini 2.0 Flash (бесплатно)',
-    description: 'Быстрая бесплатная модель Google',
+    id: 'google/gemini-2.0-flash-001',
+    name: 'Gemini 2.0 Flash',
+    description: 'Быстрая модель Google ($0.10/M токенов)',
   },
   {
-    id: 'openai/gpt-oss-20b:free',
-    name: 'GPT-OSS 20B (бесплатно)',
-    description: 'Бесплатная модель OpenAI',
+    id: 'anthropic/claude-3.5-haiku',
+    name: 'Claude 3.5 Haiku',
+    description: 'Быстрая модель Anthropic ($0.80/M токенов)',
   },
   {
-    id: 'meta-llama/llama-3.3-70b-instruct:free',
-    name: 'Llama 3.3 70B (бесплатно)',
-    description: 'Мощная бесплатная модель Meta',
+    id: 'openai/gpt-4o-mini',
+    name: 'GPT-4o Mini',
+    description: 'Экономичная модель OpenAI ($0.15/M токенов)',
   },
   {
-    id: 'qwen/qwen3-235b-a22b:free',
-    name: 'Qwen3 235B (бесплатно)',
-    description: 'Большая бесплатная модель Alibaba',
+    id: 'meta-llama/llama-3.3-70b-instruct',
+    name: 'Llama 3.3 70B',
+    description: 'Мощная модель Meta ($0.40/M токенов)',
   },
 ];
 
