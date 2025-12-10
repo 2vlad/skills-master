@@ -6,9 +6,9 @@ export interface ModelOption {
 
 export const AVAILABLE_MODELS: ModelOption[] = [
   {
-    id: 'x-ai/grok-4.1-fast:free',
-    name: 'Grok 4.1 Fast (бесплатно)',
-    description: 'Быстрая бесплатная модель xAI',
+    id: 'google/gemini-2.0-flash-exp:free',
+    name: 'Gemini 2.0 Flash (бесплатно)',
+    description: 'Быстрая бесплатная модель Google',
   },
   {
     id: 'openai/gpt-oss-20b:free',
@@ -16,14 +16,14 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     description: 'Бесплатная модель OpenAI',
   },
   {
-    id: 'anthropic/claude-haiku-4.5',
-    name: 'Claude Haiku 4.5',
-    description: 'Быстрая модель (платно)',
+    id: 'meta-llama/llama-3.3-70b-instruct:free',
+    name: 'Llama 3.3 70B (бесплатно)',
+    description: 'Мощная бесплатная модель Meta',
   },
   {
-    id: 'openai/gpt-5.1',
-    name: 'GPT-5.1',
-    description: 'Качественная модель (платно)',
+    id: 'qwen/qwen3-235b-a22b:free',
+    name: 'Qwen3 235B (бесплатно)',
+    description: 'Большая бесплатная модель Alibaba',
   },
 ];
 
