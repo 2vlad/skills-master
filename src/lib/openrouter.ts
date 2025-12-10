@@ -51,55 +51,83 @@ export class OpenRouterClient {
     this.baseUrl = config.baseUrl || 'https://openrouter.ai/api/v1';
   }
 
-  async generate(request: GenerateRequest): Promise<string> {
-    const response = await fetch(`${this.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
-        'HTTP-Referer': 'https://skills-master.vercel.app',
-        'X-Title': 'Skills-Master',
-      },
-      body: JSON.stringify({
-        model: request.model,
-        messages: request.messages,
-        temperature: request.temperature ?? 0.7,
-        max_tokens: request.max_tokens ?? 4096,
-      }),
-    });
+  private async sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      
-      if (response.status === 401) {
-        throw new OpenRouterError(
-          'Неверный API ключ OpenRouter',
-          response.status,
-          errorText
-        );
-      }
-      
-      if (response.status === 429) {
-        throw new OpenRouterError(
-          'Превышен лимит запросов. Подождите немного и попробуйте снова.',
-          response.status,
-          errorText
-        );
-      }
-      
-      throw new OpenRouterError(
-        `Ошибка OpenRouter: ${response.status}`,
-        response.status,
-        errorText
-      );
-    }
-
-    const data: OpenRouterResponse = await response.json();
+  async generate(request: GenerateRequest, retries = 3): Promise<string> {
+    let lastError: Error | null = null;
     
-    if (!data.choices || data.choices.length === 0) {
-      throw new OpenRouterError('Модель не вернула ответ');
-    }
+    for (let attempt = 0; attempt < retries; attempt++) {
+      if (attempt > 0) {
+        // Exponential backoff: 2s, 4s, 8s...
+        const delay = Math.pow(2, attempt) * 1000;
+        console.log(`Rate limited. Retrying in ${delay/1000}s... (attempt ${attempt + 1}/${retries})`);
+        await this.sleep(delay);
+      }
 
-    return data.choices[0].message.content;
+      try {
+        const response = await fetch(`${this.baseUrl}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.apiKey}`,
+            'HTTP-Referer': 'https://skills-master.vercel.app',
+            'X-Title': 'Skills-Master',
+          },
+          body: JSON.stringify({
+            model: request.model,
+            messages: request.messages,
+            temperature: request.temperature ?? 0.7,
+            max_tokens: request.max_tokens ?? 4096,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          
+          if (response.status === 401) {
+            throw new OpenRouterError(
+              'Неверный API ключ OpenRouter',
+              response.status,
+              errorText
+            );
+          }
+          
+          if (response.status === 429) {
+            // Rate limited - continue to retry
+            lastError = new OpenRouterError(
+              'Превышен лимит запросов. Подождите немного и попробуйте снова.',
+              response.status,
+              errorText
+            );
+            continue;
+          }
+          
+          throw new OpenRouterError(
+            `Ошибка OpenRouter: ${response.status}`,
+            response.status,
+            errorText
+          );
+        }
+
+        const data: OpenRouterResponse = await response.json();
+        
+        if (!data.choices || data.choices.length === 0) {
+          throw new OpenRouterError('Модель не вернула ответ');
+        }
+
+        return data.choices[0].message.content;
+      } catch (error) {
+        if (error instanceof OpenRouterError && error.statusCode === 429) {
+          lastError = error;
+          continue;
+        }
+        throw error;
+      }
+    }
+    
+    // All retries exhausted
+    throw lastError || new OpenRouterError('Превышен лимит запросов после всех попыток');
   }
 }
