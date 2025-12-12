@@ -1,6 +1,6 @@
 const ELEVENLABS_BASE_URL = 'https://api.elevenlabs.io/v1';
-// Marcus - deep professional male voice suitable for Russian
-const DEFAULT_VOICE_ID = 'txnqEtj60BWUAAwG9wbc';
+// Adam - deep professional male voice, supports multilingual
+const DEFAULT_VOICE_ID = 'pNInz6obpgDQGcFmaJgB';
 const MODEL_ID = 'eleven_multilingual_v2'; // Required for high-quality Russian
 
 export type ElevenLabsErrorCode = 'AUTH_ERROR' | 'RATE_LIMIT' | 'INVALID_REQUEST' | 'SERVER_ERROR' | 'NETWORK_ERROR';
