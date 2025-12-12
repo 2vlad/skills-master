@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import type { Skill } from '@/types/skills';
+import { MediaTeaser } from './media-teaser';
 
 interface SkillAccordionProps {
   skill: Skill;
+  model?: string;
 }
 
-export function SkillAccordion({ skill }: SkillAccordionProps) {
+export function SkillAccordion({ skill, model }: SkillAccordionProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -120,6 +122,16 @@ export function SkillAccordion({ skill }: SkillAccordionProps) {
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* Media Teaser Section (Audio + Video) */}
+          <div>
+            <h4 className="apple-section-title">Медиа-тизер</h4>
+            <MediaTeaser
+              skillName={skill.name}
+              summary={skill.summary}
+              model={model}
+            />
           </div>
         </div>
       )}

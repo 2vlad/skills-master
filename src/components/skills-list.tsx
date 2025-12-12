@@ -7,9 +7,10 @@ import type { Skill, SpecialistProfile } from '@/types/skills';
 interface SkillsListProps {
   skills: Skill[];
   profile: SpecialistProfile | null;
+  model?: string;
 }
 
-export function SkillsList({ skills, profile }: SkillsListProps) {
+export function SkillsList({ skills, profile, model }: SkillsListProps) {
   if (skills.length === 0) {
     return null;
   }
@@ -32,7 +33,7 @@ export function SkillsList({ skills, profile }: SkillsListProps) {
       {/* Skills accordions */}
       <div className="space-y-3">
         {skills.map((skill) => (
-          <SkillAccordion key={skill.id} skill={skill} />
+          <SkillAccordion key={skill.id} skill={skill} model={model} />
         ))}
       </div>
 

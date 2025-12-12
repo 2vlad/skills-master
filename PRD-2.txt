@@ -1,0 +1,126 @@
+# PRD: Video Teaser Expansion (HeyGen Integration)
+
+## 1\. Context & Objective
+
+**Project:** Skills-Master (Next.js 14, TypeScript, OpenRouter).
+**Goal:** Expand the existing functionality by adding a "Generate Video Teaser" feature to the Skill Accordion.
+**Provider:** HeyGen API v2 (for video generation) + OpenRouter (for script generation).
+**Constraint:** To optimize costs and speed, videos must be limited to **1 minute** (\~150 words).
+**Workflow:** Async generation with polling (Client -\> Server -\> HeyGen -\> Polling -\> Video URL).
+
+## 2\. Technical Requirements
+
+### 2.1 Environment Variables
+
+Add to `.env.local`:
+
+  - `HEYGEN_API_KEY`: API Key from HeyGen.
+
+### 2.2 External APIs
+
+1.  **OpenRouter (LLM):** Generate a short, punchy script (max 150 words) based on the skill summary.
+2.  **HeyGen API v2:**
+      - Endpoint: `https://api.heygen.com/v2/video/generate`
+      - Endpoint: `https://api.heygen.com/v1/video_status.get`
+      - Avatar: Use a professional preset (e.g., "Eric\_public\_pro2\_20230608").
+      - Voice: Use a Russian male voice ID (placeholder: `2d5b0e6cf361460aa96d87d995c80882` or similar compatible ID).
+
+## 3\. Backend Implementation Plan
+
+### 3.1 New Library: `src/lib/heygen.ts`
+
+Create a typed client for HeyGen interaction.
+
+  - **Function `generateVideo(script: string)`**:
+      - Sends POST request to create video.
+      - Payload must include `input_text`, `avatar_id`, `voice_id`.
+      - Returns `video_id`.
+  - **Function `checkStatus(videoId: string)`**:
+      - Sends GET request.
+      - Returns status (`processing`, `completed`, `failed`) and `video_url`.
+
+### 3.2 Update Library: `src/lib/script-generator.ts`
+
+Add a new function `generateOneMinuteScript(skillName: string, summary: string)`.
+
+  - **Prompt Logic:**
+      - Role: Video Producer.
+      - Output: Plain text (no markdown), Russian language.
+      - Structure: Hook -\> Core Value -\> Call to Action.
+      - Length limit: \~130-150 words (strictly for 1 min video).
+
+### 3.3 API Routes
+
+Create `src/app/api/heygen/` structure.
+
+**Route 1: POST `/api/heygen/create`**
+
+  - Input: `{ skillName, summary }`
+  - Process:
+    1.  Call `generateOneMinuteScript`.
+    2.  Call `heygen.generateVideo`.
+  - Output: `{ videoId: string, script: string }`
+
+**Route 2: GET `/api/heygen/status`**
+
+  - Input: `?videoId=...`
+  - Process: Call `heygen.checkStatus`.
+  - Output: `{ status: 'processing' | 'completed' | 'failed', url: string | null }`
+
+## 4\. Frontend Implementation Plan
+
+### 4.1 Custom Hook: `src/hooks/useHeyGen.ts`
+
+Manage the complex state of async generation.
+
+  - **State:**
+      - `loading`: boolean
+      - `script`: string | null
+      - `videoData`: `{ url: string | null, status: 'idle' | 'generating_script' | 'processing' | 'completed' | 'failed' }`
+  - **Logic:**
+      - `startGeneration(name, summary)`: Calls create API.
+      - `pollStatus(videoId)`: Uses `setInterval` (5000ms) to check status until `completed` or `failed`.
+
+### 4.2 UI Component: `src/components/video-teaser.tsx`
+
+A new component to be embedded inside `SkillAccordion`.
+
+  - **Idle State:** "Generate 1-min Teaser" button (variant: secondary/outline).
+  - **Scripting State:** Loader "Writing script...".
+  - **Processing State:** Show the generated script (text block) + Loader "Rendering Avatar (\~1 min)...".
+  - **Completed State:** HTML5 `<video>` player with the result URL.
+  - **Error State:** Error message + Retry button.
+
+### 4.3 Integration
+
+  - Import `VideoTeaserSection` into `src/components/skill-accordion.tsx`.
+  - Place it at the bottom of the accordion content (after `project` section).
+
+## 5\. Data Structures (TypeScript)
+
+**HeyGen Response Types:**
+
+```typescript
+interface HeyGenGenerateResponse {
+  error?: any;
+  data: {
+    video_id: string;
+  };
+}
+
+interface HeyGenStatusResponse {
+  data: {
+    status: 'processing' | 'completed' | 'failed' | 'pending';
+    video_url?: string;
+    thumbnail_url?: string;
+    error?: any;
+  };
+}
+```
+
+## 6\. Success Criteria
+
+1.  User clicks "Generate Video".
+2.  Within \~10 seconds, the Script text appears in the UI.
+3.  Within \~60-120 seconds, the Video player appears automatically without page reload.
+4.  Video plays correctly with sound.

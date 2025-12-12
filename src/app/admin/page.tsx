@@ -130,6 +130,7 @@ export default function AdminPage() {
                 <SkillsList 
                   skills={state.result?.skills || state.skills} 
                   profile={state.result?.specialistProfile || null}
+                  model={model}
                 />
               </div>
             )}
