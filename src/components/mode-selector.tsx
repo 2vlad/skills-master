@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, Mic, Video } from 'lucide-react';
+import { Mic, Video } from 'lucide-react';
 
 export type GenerationMode = 'curriculum' | 'audio' | 'video';
 
@@ -8,37 +8,37 @@ interface ModeSelectorProps {
   value: GenerationMode;
   onChange: (value: GenerationMode) => void;
   disabled?: boolean;
+  skillsCount: number;
 }
 
-const modes = [
-  { 
-    id: 'curriculum' as const, 
-    name: 'Curriculum', 
-    description: 'Структурированный учебный план',
-    icon: BookOpen 
-  },
+const mediaModes = [
   { 
     id: 'audio' as const, 
     name: 'Аудио-курс', 
-    description: 'Подкаст-эпизоды для каждого навыка',
-    icon: Mic 
+    description: 'Подкаст-эпизоды (~5 сек на эпизод)',
+    icon: Mic,
+    color: 'purple'
   },
   { 
     id: 'video' as const, 
     name: 'Видео-курс', 
-    description: 'Видео-уроки с AI-аватаром',
-    icon: Video 
+    description: 'Видео с AI-аватаром (~1-2 мин)',
+    icon: Video,
+    color: 'blue'
   },
 ];
 
-export function ModeSelector({ value, onChange, disabled }: ModeSelectorProps) {
+export function ModeSelector({ value, onChange, disabled, skillsCount }: ModeSelectorProps) {
   return (
     <div>
       <label className="block text-sm font-medium text-[#1d1d1f] mb-2">
-        Формат контента
+        Создать медиа-курс
       </label>
+      <p className="text-xs text-[#86868b] mb-3">
+        {skillsCount} эпизодов будут сгенерированы последовательно
+      </p>
       <div className="space-y-2">
-        {modes.map((mode) => {
+        {mediaModes.map((mode) => {
           const Icon = mode.icon;
           const isSelected = value === mode.id;
           
@@ -59,9 +59,16 @@ export function ModeSelector({ value, onChange, disabled }: ModeSelectorProps) {
             >
               <div className={`
                 w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0
-                ${isSelected ? 'bg-white/20' : 'bg-white'}
+                ${isSelected 
+                  ? 'bg-white/20' 
+                  : mode.color === 'purple' ? 'bg-purple-100' : 'bg-blue-100'
+                }
               `}>
-                <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-[#1d1d1f]'}`} />
+                <Icon className={`w-5 h-5 ${
+                  isSelected 
+                    ? 'text-white' 
+                    : mode.color === 'purple' ? 'text-purple-600' : 'text-blue-600'
+                }`} />
               </div>
               <div className="min-w-0">
                 <p className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-[#1d1d1f]'}`}>
@@ -75,6 +82,18 @@ export function ModeSelector({ value, onChange, disabled }: ModeSelectorProps) {
           );
         })}
       </div>
+      
+      {/* Back to curriculum button */}
+      {value !== 'curriculum' && (
+        <button
+          type="button"
+          onClick={() => onChange('curriculum')}
+          disabled={disabled}
+          className="w-full mt-3 text-sm text-[#0071e3] hover:underline disabled:opacity-50"
+        >
+          ← Назад к Curriculum
+        </button>
+      )}
     </div>
   );
 }
