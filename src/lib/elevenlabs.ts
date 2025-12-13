@@ -42,8 +42,10 @@ export async function generateAudio(
 ): Promise<ArrayBuffer> {
   const {
     voiceId = getVoiceId(),
-    stability = 0.5,
-    similarityBoost = 0.75,
+    // Lower stability = more expressive, closer to original
+    stability = 0.35,
+    // Higher similarity = closer to the original voice sample
+    similarityBoost = 0.9,
   } = options;
 
   try {
