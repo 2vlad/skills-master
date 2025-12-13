@@ -9,9 +9,9 @@ import { GenerateButton } from '@/components/generate-button';
 import { ProgressIndicator } from '@/components/progress-indicator';
 import { SkillsList } from '@/components/skills-list';
 import { DownloadButton } from '@/components/download-button';
-import { EpisodePlayer } from '@/components/episode-player';
+import { CoursePlayer } from '@/components/course-player';
 import { useGeneration } from '@/hooks/useGeneration';
-import { BookOpen, Mic, Video, CheckCircle2 } from 'lucide-react';
+import { BookOpen, Mic, Video } from 'lucide-react';
 
 export default function AdminPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -26,10 +26,13 @@ export default function AdminPage() {
     await startGeneration(file, model, profileName);
   };
 
+  const handleReset = () => {
+    setFile(null);
+    reset();
+  };
+
   const canGenerate = file && profileName.trim() && state.status === 'idle';
-  const hasSkills = state.skills.length > 0 || (state.result?.skills?.length || 0) > 0;
   const skills = state.result?.skills || state.skills;
-  const isCompleted = state.status === 'completed' && hasSkills;
 
   return (
     <div className="min-h-screen bg-[#fbfbfd]">
@@ -46,140 +49,88 @@ export default function AdminPage() {
           <div className="lg:w-[360px] flex-shrink-0">
             <div className="apple-card p-6 space-y-6 sticky top-24">
               
-              {/* STEP 1: Curriculum Generation */}
-              {mode === 'curriculum' && (
-                <>
-                  {/* Upload Section */}
-                  <div>
-                    <h2 className="apple-section-title">1. Загрузка</h2>
-                    <FileUpload 
-                      onFileSelect={setFile} 
-                      selectedFile={file}
+              {/* Mode Selection - Always visible */}
+              <ModeSelector
+                value={mode}
+                onChange={setMode}
+                disabled={state.status === 'generating'}
+              />
+
+              {/* Upload Section */}
+              <div>
+                <h2 className="apple-section-title">Загрузка CSV</h2>
+                <FileUpload 
+                  onFileSelect={setFile} 
+                  selectedFile={file}
+                  disabled={state.status === 'generating'}
+                />
+              </div>
+
+              {/* Settings Section */}
+              <div>
+                <h2 className="apple-section-title">Настройки</h2>
+                <div className="space-y-4">
+                  <ModelSelector 
+                    value={model} 
+                    onChange={setModel}
+                    disabled={state.status === 'generating'}
+                  />
+                  
+                  {/* Profile name only for curriculum mode */}
+                  {mode === 'curriculum' && (
+                    <ProfileNameInput 
+                      value={profileName} 
+                      onChange={setProfileName}
                       disabled={state.status === 'generating'}
                     />
-                  </div>
-
-                  {/* Settings Section */}
-                  <div>
-                    <h2 className="apple-section-title">2. Настройки</h2>
-                    <div className="space-y-4">
-                      <ModelSelector 
-                        value={model} 
-                        onChange={setModel}
-                        disabled={state.status === 'generating'}
-                      />
-                      <ProfileNameInput 
-                        value={profileName} 
-                        onChange={setProfileName}
-                        disabled={state.status === 'generating'}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Generate Button */}
-                  <GenerateButton 
-                    onClick={handleGenerate}
-                    disabled={!canGenerate}
-                    loading={state.status === 'generating'}
-                  />
-
-                  {/* Progress */}
-                  {state.status === 'generating' && (
-                    <ProgressIndicator 
-                      current={state.progress.current}
-                      total={state.progress.total}
-                      currentSkill={state.progress.currentSkill}
-                    />
                   )}
+                </div>
+              </div>
 
-                  {/* Error */}
-                  {state.error && (
-                    <div className="p-4 bg-[#fff5f5] rounded-xl">
-                      <p className="text-[#1d1d1f] text-sm leading-relaxed">{state.error}</p>
-                      <button 
-                        onClick={reset}
-                        className="mt-3 text-sm text-[#0071e3] font-medium hover:underline"
-                      >
-                        Попробовать снова
-                      </button>
-                    </div>
-                  )}
-
-                  {/* STEP 2: Media Generation - appears after curriculum is done */}
-                  {isCompleted && (
-                    <div className="pt-6 border-t border-[rgba(0,0,0,0.06)]">
-                      <div className="flex items-center gap-2 mb-4">
-                        <CheckCircle2 className="w-5 h-5 text-green-500" />
-                        <span className="text-sm font-medium text-green-700">
-                          Curriculum готов!
-                        </span>
-                      </div>
-                      <ModeSelector
-                        value={mode}
-                        onChange={setMode}
-                        disabled={false}
-                        skillsCount={skills.length}
-                      />
-                    </div>
-                  )}
-                </>
+              {/* Generate Button - only for curriculum mode */}
+              {mode === 'curriculum' && (
+                <GenerateButton 
+                  onClick={handleGenerate}
+                  disabled={!canGenerate}
+                  loading={state.status === 'generating'}
+                />
               )}
 
-              {/* MEDIA MODE: Audio or Video */}
-              {mode !== 'curriculum' && (
-                <>
-                  <div className="flex items-center gap-3 pb-4 border-b border-[rgba(0,0,0,0.06)]">
-                    <div className={`
-                      w-12 h-12 rounded-xl flex items-center justify-center
-                      ${mode === 'audio' ? 'bg-purple-100' : 'bg-blue-100'}
-                    `}>
-                      {mode === 'audio' ? (
-                        <Mic className="w-6 h-6 text-purple-600" />
-                      ) : (
-                        <Video className="w-6 h-6 text-blue-600" />
-                      )}
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-semibold text-[#1d1d1f]">
-                        {mode === 'audio' ? 'Аудио-курс' : 'Видео-курс'}
-                      </h2>
-                      <p className="text-sm text-[#86868b]">
-                        {skills.length} эпизодов
-                      </p>
-                    </div>
-                  </div>
+              {/* Progress - only for curriculum */}
+              {mode === 'curriculum' && state.status === 'generating' && (
+                <ProgressIndicator 
+                  current={state.progress.current}
+                  total={state.progress.total}
+                  currentSkill={state.progress.currentSkill}
+                />
+              )}
 
-                  {/* Model selector for media generation */}
-                  <div>
-                    <h2 className="apple-section-title">Настройки</h2>
-                    <ModelSelector 
-                      value={model} 
-                      onChange={setModel}
-                      disabled={false}
-                    />
-                  </div>
-
-                  {/* Info */}
-                  <div className="p-4 bg-[#f5f5f7] rounded-xl">
-                    <p className="text-sm text-[#1d1d1f]">
-                      {mode === 'audio' 
-                        ? '🎙️ Аудио генерируется за ~5-10 секунд на эпизод'
-                        : '🎬 Видео рендерится ~1-2 минуты на эпизод'
-                      }
-                    </p>
-                    <p className="text-xs text-[#86868b] mt-2">
-                      Эпизоды генерируются по требованию при переключении
-                    </p>
-                  </div>
-
-                  {/* Back button */}
-                  <button
-                    onClick={() => setMode('curriculum')}
-                    className="w-full py-3 text-sm text-[#0071e3] hover:underline"
+              {/* Error */}
+              {state.error && mode === 'curriculum' && (
+                <div className="p-4 bg-[#fff5f5] rounded-xl">
+                  <p className="text-[#1d1d1f] text-sm leading-relaxed">{state.error}</p>
+                  <button 
+                    onClick={reset}
+                    className="mt-3 text-sm text-[#0071e3] font-medium hover:underline"
                   >
-                    ← Назад к Curriculum
+                    Попробовать снова
                   </button>
-                </>
+                </div>
+              )}
+
+              {/* Info for media modes */}
+              {mode !== 'curriculum' && file && (
+                <div className="p-4 bg-[#f5f5f7] rounded-xl">
+                  <p className="text-sm text-[#1d1d1f]">
+                    {mode === 'audio' 
+                      ? '🎙️ Аудио генерируется голосом Lebedev'
+                      : '🎬 Видео с AI-аватаром'
+                    }
+                  </p>
+                  <p className="text-xs text-[#86868b] mt-2">
+                    Уроки генерируются последовательно при переключении
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -196,6 +147,9 @@ export default function AdminPage() {
                         <BookOpen className="w-8 h-8 text-[#86868b]" />
                       </div>
                       <p className="text-[#86868b] text-lg">Загрузите CSV и запустите генерацию</p>
+                      <p className="text-sm text-[#86868b] mt-2">
+                        Или выберите Аудио/Видео формат для быстрого старта
+                      </p>
                     </div>
                   </div>
                 )}
@@ -206,14 +160,14 @@ export default function AdminPage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <h2 className="text-2xl font-semibold text-[#1d1d1f]">Curriculum</h2>
-                          <p className="text-[#86868b] mt-1">{state.result.skills.length} скиллов сгенерировано</p>
+                          <p className="text-[#86868b] mt-1">{state.result.skills.length} скиллов</p>
                         </div>
                         <DownloadButton data={state.result} />
                       </div>
                     )}
 
                     {state.status === 'generating' && (
-                      <h2 className="text-2xl font-semibold text-[#1d1d1f]">Обработанные скиллы</h2>
+                      <h2 className="text-2xl font-semibold text-[#1d1d1f]">Генерация...</h2>
                     )}
 
                     <SkillsList 
@@ -235,14 +189,15 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <h2 className="text-2xl font-semibold text-[#1d1d1f]">Аудио-курс</h2>
-                    <p className="text-[#86868b]">Подкаст-эпизоды для каждого навыка</p>
+                    <p className="text-[#86868b]">Подкаст-уроки</p>
                   </div>
                 </div>
 
-                <EpisodePlayer
-                  skills={skills}
+                <CoursePlayer
+                  file={file}
                   type="audio"
                   model={model}
+                  onReset={handleReset}
                 />
               </div>
             )}
@@ -256,14 +211,15 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <h2 className="text-2xl font-semibold text-[#1d1d1f]">Видео-курс</h2>
-                    <p className="text-[#86868b]">Видео-уроки с AI-аватаром</p>
+                    <p className="text-[#86868b]">Уроки с AI-аватаром</p>
                   </div>
                 </div>
 
-                <EpisodePlayer
-                  skills={skills}
+                <CoursePlayer
+                  file={file}
                   type="video"
                   model={model}
+                  onReset={handleReset}
                 />
               </div>
             )}
