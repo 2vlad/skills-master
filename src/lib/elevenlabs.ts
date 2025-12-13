@@ -1,7 +1,12 @@
 const ELEVENLABS_BASE_URL = 'https://api.elevenlabs.io/v1';
-// Adam - deep professional male voice, supports multilingual
-const DEFAULT_VOICE_ID = 'pNInz6obpgDQGcFmaJgB';
+// Fallback: Adam - deep professional male voice, supports multilingual
+const FALLBACK_VOICE_ID = 'pNInz6obpgDQGcFmaJgB';
 const MODEL_ID = 'eleven_multilingual_v2'; // Required for high-quality Russian
+
+// Use custom voice if set, otherwise fallback
+export function getVoiceId(): string {
+  return process.env.ELEVENLABS_VOICE_ID || FALLBACK_VOICE_ID;
+}
 
 export type ElevenLabsErrorCode = 'AUTH_ERROR' | 'RATE_LIMIT' | 'INVALID_REQUEST' | 'SERVER_ERROR' | 'NETWORK_ERROR';
 
@@ -36,7 +41,7 @@ export async function generateAudio(
   options: GenerateAudioOptions = {}
 ): Promise<ArrayBuffer> {
   const {
-    voiceId = DEFAULT_VOICE_ID,
+    voiceId = getVoiceId(),
     stability = 0.5,
     similarityBoost = 0.75,
   } = options;
