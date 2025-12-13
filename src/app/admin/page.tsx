@@ -107,11 +107,11 @@ export default function AdminPage() {
 
               {/* Error */}
               {state.error && mode === 'curriculum' && (
-                <div className="p-4 bg-[#fff5f5] rounded-xl">
+                <div className="p-4 bg-[#f5f5f7] rounded-xl border border-[rgba(0,0,0,0.06)]">
                   <p className="text-[#1d1d1f] text-sm leading-relaxed">{state.error}</p>
                   <button 
                     onClick={reset}
-                    className="mt-3 text-sm text-[#0071e3] font-medium hover:underline"
+                    className="mt-3 text-sm text-[#1d1d1f] font-medium hover:underline"
                   >
                     Попробовать снова
                   </button>
@@ -184,8 +184,8 @@ export default function AdminPage() {
             {mode === 'audio' && (
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-                    <Mic className="w-5 h-5 text-purple-600" />
+                  <div className="w-10 h-10 rounded-xl bg-[#f5f5f7] flex items-center justify-center">
+                    <Mic className="w-5 h-5 text-[#1d1d1f]" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-semibold text-[#1d1d1f]">Аудио-курс</h2>
@@ -206,8 +206,8 @@ export default function AdminPage() {
             {mode === 'video' && (
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                    <Video className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 rounded-xl bg-[#f5f5f7] flex items-center justify-center">
+                    <Video className="w-5 h-5 text-[#1d1d1f]" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-semibold text-[#1d1d1f]">Видео-курс</h2>
